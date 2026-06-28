@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Almanac — A Fact a Day</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ground-1:#16242F;
+    --ground-2:#1E3340;
+    --paper:#F5EFE2;
+    --paper-edge:#E8DFCB;
+    --ink:#22303A;
+    --ink-soft:#5C6B73;
+    --gold:#C2902F;
+    --gold-deep:#9E7220;
+    --line:rgba(34,48,58,.12);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    color:var(--paper);
+    background:
+      radial-gradient(120% 90% at 50% -10%, #24414f 0%, var(--ground-2) 42%, var(--ground-1) 100%);
+    background-attachment:fixed;
+    min-height:100dvh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:max(18px,env(safe-area-inset-top)) 18px max(24px,env(safe-area-inset-bottom));
+  }
+
+  .bar{
+    width:100%;max-width:560px;
+    display:flex;align-items:baseline;justify-content:space-between;
+    margin-bottom:26px;
+  }
+  .wordmark{
+    font-family:'Fraunces',serif;font-weight:600;
+    font-size:21px;letter-spacing:.02em;color:var(--paper);
+  }
+  .wordmark .dot{color:var(--gold);}
+  .tagline{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:rgba(245,239,226,.5);}
+
+  .card{
+    position:relative;
+    width:100%;max-width:560px;
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:18px;
+    padding:54px 34px 30px;
+    box-shadow:0 1px 0 rgba(255,255,255,.25) inset,
+               0 26px 50px -18px rgba(0,0,0,.55),
+               0 6px 14px -8px rgba(0,0,0,.4);
+    transition:transform .28s cubic-bezier(.2,.7,.2,1),opacity .28s;
+  }
+  .tab{
+    position:absolute;top:-15px;left:34px;
+    background:var(--ink);color:var(--paper);
+    font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+    padding:8px 15px;border-radius:8px;
+    box-shadow:0 8px 16px -8px rgba(0,0,0,.6);
+  }
+  .tab .num{color:var(--gold);}
+  .chip-cat{
+    display:inline-block;
+    font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--gold-deep);
+    margin-bottom:18px;
+  }
+  .chip-cat::before{content:"";display:inline-block;width:18px;height:1px;
+    background:var(--gold);vertical-align:middle;margin-right:9px;margin-bottom:3px;}
+  .fact{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-size:clamp(25px,5.4vw,33px);
+    line-height:1.28;
+    letter-spacing:-.01em;
+    margin:0 0 26px;
+    min-height:148px;
+  }
+  .card-foot{
+    display:flex;align-items:center;justify-content:space-between;
+    border-top:1px solid var(--line);padding-top:16px;
+  }
+  .counter{font-size:12px;color:var(--ink-soft);letter-spacing:.04em;}
+  .heart{
+    appearance:none;border:none;background:none;cursor:pointer;
+    font-size:22px;line-height:1;padding:4px;color:var(--ink-soft);
+    transition:transform .15s,color .15s;
+  }
+  .heart:active{transform:scale(.8);}
+  .heart.on{color:#C2453A;}
+
+  .controls{
+    width:100%;max-width:560px;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    margin-top:22px;
+  }
+  .nav{
+    appearance:none;cursor:pointer;
+    width:52px;height:52px;border-radius:50%;
+    border:1px solid rgba(245,239,226,.22);
+    background:rgba(245,239,226,.06);color:var(--paper);
+    font-size:20px;display:flex;align-items:center;justify-content:center;
+    transition:background .15s,transform .12s;
+  }
+  .nav:active{transform:scale(.92);background:rgba(245,239,226,.14);}
+  .surprise{
+    flex:1;max-width:230px;height:52px;border-radius:26px;cursor:pointer;
+    border:none;background:var(--gold);color:#241803;
+    font-family:'Inter',sans-serif;font-weight:600;font-size:15px;letter-spacing:.01em;
+    display:flex;align-items:center;justify-content:center;gap:9px;
+    transition:transform .12s,background .15s;
+  }
+  .surprise:active{transform:scale(.97);background:#d59c33;}
+
+  .today-link{
+    margin-top:16px;height:34px;border:none;background:none;cursor:pointer;
+    color:rgba(245,239,226,.55);font-family:'Inter',sans-serif;font-size:13px;
+    letter-spacing:.02em;text-decoration:underline;text-underline-offset:3px;
+    opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  .today-link.show{opacity:1;pointer-events:auto;}
+
+  .rail-wrap{width:100%;max-width:560px;margin-top:30px;}
+  .rail-label{font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+    color:rgba(245,239,226,.45);margin-bottom:12px;padding-left:2px;}
+  .rail{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;}
+  .rail::-webkit-scrollbar{display:none;}
+  .pill{
+    flex:0 0 auto;cursor:pointer;
+    padding:9px 15px;border-radius:20px;
+    border:1px solid rgba(245,239,226,.2);
+    background:transparent;color:rgba(245,239,226,.8);
+    font-family:'Inter',sans-serif;font-size:13px;font-weight:500;white-space:nowrap;
+    transition:background .15s,color .15s,border-color .15s;
+  }
+  .pill.on{background:var(--paper);color:var(--ink);border-color:var(--paper);}
+
+  .fav-toggle{
+    width:100%;max-width:560px;margin-top:22px;cursor:pointer;
+    background:rgba(245,239,226,.05);border:1px solid rgba(245,239,226,.16);
+    color:var(--paper);border-radius:14px;padding:15px 18px;
+    font-family:'Inter',sans-serif;font-size:14px;font-weight:500;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .fav-count{color:var(--gold);font-weight:600;}
+  .fav-panel{
+    width:100%;max-width:560px;margin-top:10px;
+    display:none;flex-direction:column;gap:8px;
+  }
+  .fav-panel.open{display:flex;}
+  .fav-item{
+    background:rgba(245,239,226,.06);border-radius:12px;
+    padding:14px 16px;font-family:'Fraunces',serif;font-size:16px;line-height:1.4;
+    color:var(--paper);display:flex;gap:12px;align-items:flex-start;
+  }
+  .fav-item button{
+    appearance:none;border:none;background:none;color:rgba(245,239,226,.45);
+    cursor:pointer;font-size:18px;line-height:1;flex:0 0 auto;padding:2px;
+  }
+  .fav-empty{color:rgba(245,239,226,.45);font-size:14px;text-align:center;padding:22px;}
+
+  .footnote{
+    width:100%;max-width:560px;margin-top:30px;text-align:center;
+    font-size:11px;color:rgba(245,239,226,.32);line-height:1.6;letter-spacing:.02em;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none!important;animation:none!important;}
+  }
+  .fade{opacity:0;transform:translateY(6px);}
+</style>
+</head>
+<body>
+  <div class="bar">
+    <span class="wordmark">Almanac<span class="dot">.</span></span>
+    <span class="tagline">A fact a day</span>
+  </div>
+
+  <main class="card" id="card">
+    <span class="tab">Day <span class="num" id="dayNum">—</span> of 366</span>
+    <span class="chip-cat" id="catLabel">Loading</span>
+    <p class="fact" id="factText">…</p>
+    <div class="card-foot">
+      <span class="counter" id="counter"></span>
+      <button class="heart" id="heart" aria-label="Save to favorites">♡</button>
+    </div>
+  </main>
+
+  <div class="controls">
+    <button class="nav" id="prev" aria-label="Previous fact">‹</button>
+    <button class="surprise" id="shuffle">✦ Surprise me</button>
+    <button class="nav" id="next" aria-label="Next fact">›</button>
+  </div>
+  <button class="today-link" id="todayBtn">← back to today’s fact</button>
+
+  <div class="rail-wrap">
+    <div class="rail-label">Browse by topic</div>
+    <div class="rail" id="rail"></div>
+  </div>
+
+  <button class="fav-toggle" id="favToggle">
+    <span>Saved facts</span>
+    <span class="fav-count" id="favCount">0</span>
+  </button>
+  <div class="fav-panel" id="favPanel"></div>
+
+  <p class="footnote">Tap the heart to keep a fact. Add this page to your Home Screen for a one-tap fact every morning.</p>
+
+<script>
+/* ----------  TOPICS  ---------- */
+const CATS = {
+  cosmos:{label:"The Cosmos"},
+  creatures:{label:"Creatures"},
+  body:{label:"The Human Body"},
+  mind:{label:"Mind & Sleep"},
+  history:{label:"History"},
+  science:{label:"Science"},
+  inventions:{label:"Inventions"},
+  planet:{label:"Our Planet"},
+  weather:{label:"Weather & Sky"},
+  words:{label:"Words & Language"},
+  food:{label:"Food"},
+  tech:{label:"Technology"},
+  wild:{label:"Ocean & Wild"},
+  sports:{label:"Sports & Games"},
+  arts:{label:"Art & Music"},
+  mythology:{label:"Myth & Legend"},
+  numbers:{label:"Numbers"}
+};
+
+/* ----------  THE FACTS (verified / carefully phrased)  ---------- */
+const DATA = {
+cosmos:[
+"A day on Venus is longer than a year on Venus — it rotates so slowly that it orbits the Sun before finishing a single spin.",
+"Venus spins backwards compared with nearly every other planet, so there the Sun rises in the west.",
+"The footprints left by Apollo astronauts will likely stay on the Moon for millions of years — there's no wind or water to erase them.",
+"A single teaspoon of neutron-star material would weigh about a billion tonnes.",
+"The Sun accounts for about 99.8% of all the mass in our solar system.",
+"Saturn is so light for its size that, given a big enough ocean, it would float on water.",
+"There are more stars in the universe than grains of sand on every beach on Earth.",
+"Sunlight takes about eight minutes and twenty seconds to reach Earth — you always see the Sun as it was minutes ago.",
+"A year on Mercury lasts just 88 Earth days.",
+"Jupiter's Great Red Spot is a storm wider than the entire Earth that has raged for centuries.",
+"Space is silent — sound needs a medium like air to travel, and space is a near-perfect vacuum.",
+"Olympus Mons on Mars is the tallest known volcano in the solar system, about two and a half times the height of Mount Everest.",
+"Around 1.3 million Earths could fit inside the Sun.",
+"The Moon drifts about 3.8 centimetres farther from Earth every year.",
+"Light from Proxima Centauri, the nearest star beyond the Sun, takes over four years to reach us.",
+"Astronauts can grow up to two inches taller in space as the spine stretches without gravity pressing down on it.",
+"The Andromeda galaxy is heading toward us and will merge with the Milky Way in about 4.5 billion years.",
+"Halley's Comet swings past Earth roughly every 76 years; its next visit is due around 2061.",
+"The coldest known place in the universe is the Boomerang Nebula, colder than the faint afterglow of the Big Bang itself.",
+"Mars looks red because its soil is full of iron oxide — essentially rust.",
+"The International Space Station circles the entire Earth roughly once every 90 minutes.",
+"Our galaxy holds somewhere between 100 and 400 billion stars.",
+"There are probably more trees on Earth than there are stars in the Milky Way.",
+"Pluto is smaller across than the width of the United States.",
+"Uranus is tipped so far over that it essentially orbits the Sun on its side.",
+"Tears don't fall in space — without gravity, they pool into a wobbling ball.",
+"Voyager 1, launched in 1977, has travelled beyond our solar system and is the most distant human-made object from Earth.",
+"Some of the gold in jewellery was likely forged long ago in the violent collision of two neutron stars.",
+"Jupiter, Saturn, Uranus and Neptune all have rings — Saturn's are just the brightest.",
+"Mercury and Venus are the only planets in our solar system with no moons of their own."
+],
+creatures:[
+"An octopus has three hearts and blue blood.",
+"A group of flamingos is called a flamboyance.",
+"Wombats produce cube-shaped droppings.",
+"Sharks are older than trees — they've existed for over 400 million years, predating the first trees by tens of millions of years.",
+"A shrimp's heart is located in its head.",
+"Sea otters sometimes hold hands while sleeping so they don't drift apart.",
+"Cows form close friendships and become stressed when separated from their preferred companions.",
+"Tardigrades — microscopic 'water bears' — can survive the vacuum of outer space.",
+"Hummingbirds are the only birds that can fly backwards.",
+"The blue whale is the largest animal ever known to have lived — bigger than any dinosaur.",
+"Butterflies taste with sensors on their feet.",
+"Cats cannot taste sweetness; they lack the receptor for it.",
+"A koala's fingerprints are so similar to a human's that they could be confused at a crime scene.",
+"A crocodile cannot stick its tongue out.",
+"Starfish have no brain.",
+"Owls can rotate their heads about 270 degrees.",
+"Dolphins give each other names — unique signature whistles they answer to.",
+"Polar bears have black skin underneath their fur, which is colourless and only looks white.",
+"Honey found in ancient tombs was still edible thousands of years later — honey essentially never spoils.",
+"A queen ant can live for more than 30 years.",
+"Elephants are among the very few animals that cannot jump.",
+"A group of crows is fittingly called a murder.",
+"Some snails can sleep for up to three years when conditions are harsh.",
+"A hummingbird's heart can beat over 1,200 times a minute.",
+"A group of pugs is called a grumble.",
+"Flamingos get their pink colour from pigments in the shrimp and algae they eat.",
+"Reindeer eyes shift from gold in summer to blue in winter to cope with the changing light.",
+"A pistol shrimp snaps its claw so fast it makes a bubble that briefly reaches astonishing temperatures and stuns its prey.",
+"The mantis shrimp can see far more colours than we can and throws one of the fastest punches in nature.",
+"Axolotls can regrow lost limbs, and even parts of their heart and brain.",
+"Octopuses can change both colour and texture in an instant to vanish against their surroundings.",
+"A woodpecker can hammer its beak roughly 20 times a second.",
+"Giraffes get by on just a few hours of sleep a day, often in brief naps.",
+"A group of jellyfish is called a smack."
+],
+body:[
+"Your body contains enough iron to make a small nail.",
+"The human nose can distinguish more than a trillion different smells.",
+"You're slightly taller in the morning than at night, because daily pressure gently compresses your spine.",
+"Ounce for ounce, human bone is stronger than steel.",
+"Your heart beats roughly 100,000 times every day without you ever telling it to.",
+"You carry roughly as many bacterial cells as human cells in and on your body.",
+"The smallest bone in your body, the stapes in your ear, is about the size of a grain of rice.",
+"Your brain uses around 20% of your body's energy despite being just 2% of its weight.",
+"Fingernails grow noticeably faster than toenails.",
+"The cornea of your eye has no blood supply — it takes oxygen directly from the air.",
+"Your taste buds are replaced every week or two.",
+"Babies are born with about 300 bones; adults have 206, as many fuse together over time.",
+"The human body is roughly 60% water.",
+"Goosebumps are a leftover reflex from ancestors whose raised fur made them look bigger or kept them warm.",
+"Earwax is a specialised form of sweat.",
+"You blink around 15 to 20 times a minute — over 20,000 times a day.",
+"The femur, your thigh bone, is the longest and one of the strongest bones in your body.",
+"Your liver can regrow itself even after a large portion is removed.",
+"The acid in your stomach is strong enough to dissolve some metals.",
+"The strongest muscle for its size is the masseter, the jaw muscle you chew with.",
+"Much of household dust is made of dead skin cells you've shed.",
+"Your stomach grows a new lining every few days so it doesn't digest itself.",
+"You can't tickle yourself, because your brain predicts the sensation and cancels it out.",
+"Unfolded, the surface of your lungs would cover roughly the area of a tennis court.",
+"Your ears and nose seem to get bigger with age, mostly because cartilage and skin sag over time rather than truly growing.",
+"Your tongue print is unique to you, like a fingerprint.",
+"The fastest signals in your nerves travel at over 250 miles per hour.",
+"Humans give off a faint glow of light — far too dim for the eye to detect.",
+"You produce more than a litre of saliva every day.",
+"Humans appear to be the only animals that blush."
+],
+mind:[
+"Your brain is almost as active while you dream as it is when you're awake.",
+"Most people forget the vast majority of their dreams within minutes of waking.",
+"That sudden jolt as you drift off to sleep has a name: a hypnic jerk.",
+"Déjà vu is the strange feeling of having experienced a moment before, and scientists still debate exactly why it happens.",
+"Yawning may help cool the brain — and it's contagious, even between people and dogs.",
+"Smell connects almost directly to the brain's memory and emotion centres, which is why a scent can summon a memory instantly.",
+"The brain itself has no pain receptors, which is why some brain surgery can be done while the patient is awake and talking.",
+"Babies spend far more of their sleep dreaming than adults do.",
+"Memories aren't filed in one spot — they're scattered across the brain and rebuilt each time you recall them.",
+"Your short-term memory can usually juggle only about seven pieces of information at once.",
+"People blind from birth still dream, but in sounds, touch and other senses rather than images.",
+"Sleeping on a problem really can help — the brain keeps working on it while you rest.",
+"Counting sheep is a surprisingly poor way to fall asleep; picturing a calm, detailed scene works better.",
+"Trying to read text or check a clock in a dream often fails, because those parts of the brain behave differently in sleep.",
+"You can hear in your sleep — the brain keeps monitoring sounds for anything important, like your name.",
+"The brain runs on roughly the same power as a dim light bulb, about 20 watts.",
+"Your sense of taste is heavily shaped by smell, which is why food seems bland when your nose is blocked."
+],
+history:[
+"Oxford University was teaching students before the Aztec Empire even existed.",
+"Cleopatra lived closer in time to the first Moon landing than to the building of the Great Pyramid.",
+"The shortest war in history lasted under 45 minutes — the Anglo-Zanzibar War of 1896.",
+"Napoleon was once mobbed and forced to flee by a horde of rabbits during a hunting trip.",
+"Tug of war was an official Olympic event from 1900 to 1920.",
+"Albert Einstein was offered the presidency of Israel in 1952 and politely turned it down.",
+"The first item ever scanned with a barcode was a packet of Wrigley's chewing gum, in 1974.",
+"Ketchup was sold in the 1830s as a medicine to treat indigestion.",
+"The fax machine was invented in the 1840s — decades before the telephone.",
+"The Eiffel Tower can grow more than 15 centimetres taller in summer as its iron expands in the heat.",
+"Roman concrete has survived two thousand years and can even heal some of its own cracks.",
+"The Hundred Years' War actually lasted 116 years.",
+"Bubble wrap was originally invented to be sold as textured wallpaper.",
+"George Washington ran one of the largest whiskey distilleries in America at the time.",
+"The colour orange was named after the fruit, not the other way around.",
+"The Great Wall of China was built and rebuilt across many dynasties over roughly two thousand years.",
+"The Statue of Liberty was a gift to the United States from the people of France.",
+"In some winters, London's River Thames froze solid enough to host 'frost fairs' with stalls and fires on the ice.",
+"Ancient Romans collected urine and used its ammonia to launder clothes and whiten teeth.",
+"The Great Pyramid was built largely by paid, well-fed workers, not slaves — as their nearby tombs and villages reveal.",
+"Coca-Cola contained trace amounts of cocaine from coca leaves until the early 1900s.",
+"The guillotine remained France's method of execution until 1977.",
+"The Wright brothers' first flight covered a shorter distance than the wingspan of a modern jumbo jet.",
+"Vikings never wore horned helmets — that look came from 19th-century opera costumes.",
+"Lady Jane Grey was queen of England for just nine days, the shortest reign in its history.",
+"The first credit card was introduced in 1950.",
+"Napoleon was actually average height for his time; the 'short' label came from a mix-up between French and English units.",
+"Pineapples were once so rare in Europe that people rented one for an evening just to show it off at a party.",
+"In medieval Europe, animals were occasionally put on trial in a court of law.",
+"An early chainsaw design was created to assist with difficult childbirths before it was ever used on wood."
+],
+science:[
+"A bolt of lightning is around five times hotter than the surface of the Sun.",
+"Bananas are slightly radioactive thanks to the potassium they contain.",
+"Lightning strikes the Earth roughly eight million times a day.",
+"The old story that glass in old windows slowly flows downward over centuries is a myth — it doesn't.",
+"Sound travels about four times faster through water than through air.",
+"Gallium is a metal that will melt in the warmth of your hand.",
+"At a precise mix of temperature and pressure — the 'triple point' — water can boil and freeze at the same time.",
+"Apples float because roughly a quarter of their volume is air.",
+"The unwound DNA in a single human body could stretch billions of kilometres.",
+"Most of the universe is invisible to us — about 95% is dark matter and dark energy we can't directly see.",
+"Absolute zero, the coldest possible temperature, is about minus 273.15 degrees Celsius.",
+"Helium makes your voice squeak; the heavier gas sulphur hexafluoride makes it boom.",
+"Light travels about 300,000 kilometres every second.",
+"Pure oxygen, when chilled into a liquid or solid, is a pale shade of blue.",
+"The heat of chilli peppers comes from a compound called capsaicin, which tricks your nerves into sensing burning.",
+"Scientists believe it may rain diamonds deep inside Jupiter and Saturn.",
+"Rubber bands last longer when kept in the refrigerator.",
+"Spiciness isn't a taste at all — it's your body registering a kind of pain.",
+"Helium was discovered in the light of the Sun before it was ever found here on Earth.",
+"If you stripped out the empty space inside all our atoms, the entire human race could fit in the volume of a sugar cube.",
+"Water is one of the rare substances that expands when it freezes, which is why ice floats.",
+"In zero gravity, a candle flame burns as a small blue sphere rather than a teardrop.",
+"A rainbow is really a full circle of light; from the ground we usually only see the top arc.",
+"Diamond and pencil 'lead' are both pure carbon — the difference is only how the atoms are arranged.",
+"Most mirrors aren't silver at all; they're glass backed with a thin coat of aluminium.",
+"It's nearly impossible to hum while holding your nose completely closed.",
+"Thunder is the sound of air violently expanding after being superheated by a lightning bolt."
+],
+inventions:[
+"The frisbee was named after a pie company whose empty tins students used to toss around.",
+"Velcro was invented after its creator studied how burrs clung to his dog's fur.",
+"Play-Doh was originally sold as a cleaner for wallpaper.",
+"The Slinky was discovered by accident when a spring fell off a shelf and 'walked' down on its own.",
+"Super Glue was stumbled upon by researchers trying to make clear plastic gun sights.",
+"Penicillin, the first antibiotic, was found when stray mould drifted onto a forgotten lab dish.",
+"Potato crisps were supposedly born when a chef, annoyed by a fussy diner, sliced potatoes paper-thin out of spite.",
+"X-rays were discovered by chance when a scientist noticed a mysterious glow across his darkened lab.",
+"Teflon, the non-stick coating on pans, was discovered by accident during a chemistry experiment.",
+"Saccharin, the first artificial sweetener, was found when a chemist forgot to wash his hands and tasted something sweet.",
+"The microwave oven came about when an engineer noticed a snack melting in his pocket near radar equipment.",
+"The first vending machines, in ancient Egypt, dispensed holy water in exchange for a coin.",
+"Bubble gum is pink largely because that was the only food colouring its inventor had on hand.",
+"Stainless steel was discovered by a researcher trying to make a better, rust-resistant gun barrel.",
+"The dishwasher was invented by a woman who was tired of servants chipping her fine china.",
+"Braille was adapted from a military code designed to let soldiers read messages silently in the dark.",
+"Matches were invented after a chemist noticed a coated stick burst into flame when he scraped it clean.",
+"The ballpoint pen was created to write smoothly without the smudges and leaks of fountain pens.",
+"The pacemaker came partly from a happy accident, when an engineer reached for the wrong electronic part.",
+"Some of America's first roller coasters began as railways built to haul coal down mountainsides."
+],
+planet:[
+"Russia is so wide it spans eleven time zones.",
+"Africa is the only continent that sits in all four hemispheres at once.",
+"Canada has the longest coastline of any country on Earth.",
+"The Sahara was a green landscape of lakes and grassland just a few thousand years ago.",
+"Australia is wider than the Moon.",
+"The Pacific Ocean is larger than all of Earth's land combined.",
+"Antarctica is technically the largest desert on the planet — a desert is defined by lack of rainfall, not by sand.",
+"Everest's summit is the highest point above sea level, but Chimborazo's peak is the farthest from Earth's centre, thanks to the planet's equatorial bulge.",
+"The Dead Sea is so salty that swimmers float effortlessly on its surface.",
+"Vatican City is the smallest country in the world, smaller than many city parks.",
+"Istanbul is the only major city that sits on two continents — part in Europe, part in Asia.",
+"Greenland is the world's largest island.",
+"Alaska is both the westernmost and the easternmost US state, because its islands cross the 180th meridian.",
+"Mount Everest grows a few millimetres taller each year as tectonic plates push it upward.",
+"The 'lungs of the planet' nickname for the Amazon is misleading — the forest consumes nearly as much oxygen as it makes.",
+"Reno, Nevada lies farther west than Los Angeles.",
+"There are no naturally flowing rivers anywhere in Saudi Arabia.",
+"Point Nemo, the most remote spot in the ocean, is so far from land that the nearest humans are often astronauts passing overhead.",
+"The deepest known point in the ocean, the Challenger Deep, plunges nearly eleven kilometres down — deeper than Everest is tall.",
+"A single hill in New Zealand holds one of the longest place names in the world, at 85 letters.",
+"Measured from its underwater base, Hawaii's Mauna Kea is taller than Mount Everest.",
+"Lake Baikal in Siberia holds about a fifth of all the unfrozen fresh water on Earth.",
+"Bangladesh has more people than Russia, despite being a tiny fraction of the size.",
+"Iceland grows a little wider every year as two tectonic plates slowly pull apart beneath it.",
+"Africa is so vast that the United States, China, India and much of Europe could all fit inside it.",
+"Hidden beneath Antarctica's ice are lakes that have been sealed off from the world for millions of years.",
+"Angel Falls in Venezuela is so tall that much of its water turns to mist before reaching the bottom."
+],
+weather:[
+"No two snowflakes are believed to be exactly alike.",
+"Lightning can strike the same place many times — tall buildings get hit again and again.",
+"Raindrops aren't tear-shaped; falling, they flatten into something more like a tiny bun.",
+"The pleasant earthy smell after rain has a name: petrichor.",
+"A rainbow always appears opposite the Sun, which is why you see one with your back to it.",
+"Sometimes it really does rain animals — strong winds can scoop up fish or frogs and drop them elsewhere.",
+"Clouds can weigh hundreds of tonnes, yet they float because that weight is spread across an enormous volume.",
+"The Sun looks yellow from the ground but is actually white when seen from space.",
+"The northern and southern lights are caused by particles streaming from the Sun striking our atmosphere.",
+"A 'blue moon' is the second full moon in a single calendar month — it isn't actually blue.",
+"Near the poles, the Sun can stay above the horizon for weeks on end in summer.",
+"Fog is simply a cloud that has formed down at ground level.",
+"Hailstones can grow as large as grapefruits inside powerful thunderstorms.",
+"A lightning bolt heats the air around it to tens of thousands of degrees in a fraction of a second.",
+"The highest air temperature ever reliably recorded on Earth was in Death Valley, California.",
+"Deserts can plunge below freezing at night, even after a blistering hot day.",
+"The fastest winds ever measured on Earth were found inside tornadoes.",
+"Snow can appear in many colours — including pink 'watermelon snow' tinted by tiny algae."
+],
+words:[
+"The word 'set' has one of the largest number of distinct meanings of any English word.",
+"The dot over a lowercase 'i' or 'j' has a name: it's called a tittle.",
+"'Bookkeeper' is one of the few English words with three consecutive double letters.",
+"The word 'robot' comes from a Czech word meaning forced labour.",
+"The Hawaiian alphabet uses only thirteen letters.",
+"'Strengths' is the longest common English word with just one vowel.",
+"The full chemical name of the protein titin runs to around 189,000 letters — the longest 'word' in English.",
+"'Mortgage' comes from Old French and literally means 'death pledge.'",
+"Shakespeare is credited with inventing or first recording hundreds of words we still use, including 'eyeball' and 'fashionable.'",
+"'Goodbye' began life as a shortening of the phrase 'God be with ye.'",
+"The word 'avocado' traces back to an ancient word that also meant testicle, after the fruit's shape.",
+"'Disaster' comes from words meaning 'bad star' — a relic of when people blamed the stars for misfortune.",
+"Sign languages aren't universal: American and British sign languages are mutually unintelligible.",
+"The letter E is the most commonly used letter in the English language.",
+"'The quick brown fox jumps over the lazy dog' is famous because it uses every letter of the alphabet.",
+"A 'jiffy' is a real unit of time used in physics — and a very short one.",
+"'Nightmare' originally referred to an evil spirit, the 'mare,' thought to sit on a sleeper's chest.",
+"'OK' is one of the most widely recognised words on the planet, understood across countless languages.",
+"The longest word you can type using only the top row of a keyboard is 'typewriter.'",
+"No common English word forms a perfect rhyme with 'orange,' 'silver,' or 'month.'",
+"The word 'alphabet' comes from 'alpha' and 'beta,' the first two letters of the Greek alphabet.",
+"'Emoji' comes from Japanese words for 'picture' and 'character' — its resemblance to 'emotion' is a coincidence.",
+"The word 'muscle' comes from a Latin term meaning 'little mouse,' for the way muscles ripple under the skin.",
+"Because of the Norman conquest, English often uses one word for the live animal and another for its meat — 'cow' and 'beef,' 'pig' and 'pork.'",
+"'Dreamt' is the only common English word that ends in the letters 'mt.'",
+"The looping infinity symbol has a proper name: the lemniscate."
+],
+food:[
+"Carrots were originally purple; the familiar orange variety was bred much later.",
+"Peanuts aren't true nuts — they're legumes, more closely related to beans.",
+"A strawberry isn't botanically a berry, but a banana is.",
+"Honey never spoils — sealed jars have been found edible after thousands of years.",
+"Chocolate was so valued by the Aztecs that cacao beans were used as money.",
+"The most stolen food in the world is cheese.",
+"White chocolate isn't technically chocolate, since it contains no cocoa solids.",
+"Apples, pears, cherries and almonds all belong to the rose family.",
+"Ripe cranberries bounce when dropped — a trick once used to sort the good from the bad.",
+"Pineapples take around two years to grow a single fruit.",
+"Nutmeg is mildly poisonous if eaten in large amounts.",
+"Tomatoes, cucumbers and peppers are all botanically fruits, not vegetables.",
+"Every colour of fruit-flavoured loop cereal is actually the same flavour.",
+"Watermelon is about 92% water.",
+"Saffron is one of the most expensive spices on Earth by weight, because each flower yields only a few threads.",
+"The priciest coffee in the world is made from beans eaten and passed by a wild cat called the civet.",
+"Much of the 'wasabi' served outside Japan is really dyed horseradish.",
+"A baker's dozen is thirteen — bakers once added a spare loaf to avoid penalties for selling underweight bread.",
+"Honey is made when bees swallow nectar, bring it back up, and fan it dry with their wings.",
+"Lobster was once considered poor people's food and was even fed to prisoners.",
+"Vanilla is so labour-intensive because each flower often has to be pollinated by hand.",
+"Cashews grow attached to a fruit called the cashew apple and belong to the same family as poison ivy.",
+"Rhubarb stalks make a popular dessert, but the plant's leaves are poisonous.",
+"Chillies evolved their burn to deter mammals, but birds can't feel it — and they spread the seeds far and wide.",
+"Fizzy water was invented in the 1700s by a scientist who also helped discover oxygen.",
+"Real cinnamon and the cheaper cassia often sold as cinnamon come from two different trees."
+],
+tech:[
+"The very first computer mouse was carved out of wood.",
+"The world's first webcam was set up to watch a coffee pot, so researchers could check it was full before walking over.",
+"The term 'computer bug' caught on after a real moth was found jamming a machine in 1947.",
+"Email existed before the World Wide Web did.",
+"The first text message ever sent simply read 'Merry Christmas,' in 1992.",
+"'Wi-Fi' doesn't actually stand for anything — it was just a catchy brand name.",
+"Bluetooth is named after a medieval Viking king, Harald Bluetooth, who united warring tribes.",
+"The first one-gigabyte hard drive, released in 1980, was about the size of a fridge and cost a small fortune.",
+"Nokia began in the 1860s as a paper mill, long before it ever made a phone.",
+"The world's first website is still online and working today.",
+"The first YouTube video, 'Me at the zoo,' was uploaded in 2005 and lasts just 19 seconds.",
+"Ada Lovelace is widely regarded as the first computer programmer — over a century before modern computers existed.",
+"The first message sent over the early internet was meant to be 'login,' but the system crashed after two letters: 'lo.'",
+"The Firefox browser's logo is actually a red panda, an animal sometimes nicknamed the firefox.",
+"The 'save' icon in most software is a floppy disk — a storage format many people today have never held.",
+"More people around the world own a mobile phone than own a toothbrush.",
+"The QWERTY keyboard layout dates from the typewriter era, designed partly to stop fast typists jamming the keys.",
+"The computer term 'spam' for junk messages comes from a Monty Python comedy sketch.",
+"Most of the world's internet travels through cables laid along the ocean floor, not through satellites.",
+"The original Apple logo showed Isaac Newton sitting beneath a tree.",
+"The 'cloud' is really just vast warehouses full of physical computers scattered around the world.",
+"A modern smartphone has far more computing power than the systems that guided Apollo 11 to the Moon.",
+"The 'http' at the start of web addresses stands for HyperText Transfer Protocol.",
+"Programmers have hidden secret jokes and images, called Easter eggs, inside software since at least the 1970s.",
+"The world sends hundreds of billions of emails every single day.",
+"The small bumps on the F and J keys help you find the home row without looking down.",
+"The word 'pixel' is a shortening of 'picture element.'"
+],
+wild:[
+"Much of the deep ocean remains unexplored — we've mapped its floor in less detail than the surface of Mars.",
+"Most of the oxygen you breathe comes from the ocean, made by tiny drifting plants called phytoplankton, not from forests.",
+"There's a giant waterfall hidden beneath the ocean in the Denmark Strait, far taller than any waterfall on land.",
+"Trees in a forest can share nutrients and warning signals through underground networks of fungus.",
+"Some jellyfish can effectively cheat death by reverting to an earlier stage of life and starting over.",
+"The largest living thing on Earth is a single honey-fungus organism in Oregon, spreading across thousands of acres.",
+"A grove of aspen trees can be one connected organism sharing a single root system; the famous 'Pando' may be tens of thousands of years old.",
+"Bamboo is the fastest-growing plant on Earth — some species shoot up almost a metre in a single day.",
+"The oldest known living trees, bristlecone pines, have stood for over 4,800 years.",
+"Mushrooms are more closely related to animals than to plants.",
+"Coral reefs cover less than 1% of the ocean floor yet support around a quarter of all marine species.",
+"Young sunflowers turn their heads to follow the Sun across the sky each day.",
+"The ocean holds about 97% of all the water on Earth.",
+"Bioluminescent creatures fill the deep sea with their own living light, glowing in blues and greens.",
+"Lightning helps fertilise the planet by splitting nitrogen in the air into a form plants can use.",
+"Coral isn't a plant or a rock — each reef is built by colonies of tiny animals called polyps.",
+"A single teaspoon of healthy soil can hold billions of living microorganisms.",
+"Giant sequoias are so tall that water must climb over 100 metres from their roots to their highest leaves.",
+"A Venus flytrap counts — it only snaps shut after its trigger hairs are touched twice in quick succession.",
+"Some plants can sense the vibration of an insect chewing and respond by making defensive chemicals.",
+"Mangrove forests shield coastlines by soaking up the force of waves and storms.",
+"The mushroom you see is just the fruit; most of the fungus lives hidden in the soil or wood.",
+"The Amazon is so vast that it generates much of its own rainfall, recycling water through its trees."
+],
+sports:[
+"Basketball was invented using a soccer ball and two empty peach baskets.",
+"A golf ball's hundreds of dimples actually help it fly farther and straighter.",
+"The Olympic rings use five colours chosen so that every nation's flag contained at least one of them.",
+"The longest professional tennis match in history lasted over 11 hours, spread across three days.",
+"Monopoly sets were secretly used to smuggle escape maps and tools to prisoners of war.",
+"In basketball's earliest days the baskets had no hole, so someone had to fetch the ball after every score.",
+"The marathon's distance traces back to the legend of a Greek messenger who ran from Marathon to Athens.",
+"A boxing 'ring' is actually square.",
+"Formula 1 drivers can experience several times the force of gravity every time they brake hard.",
+"A cricket match can last up to five days and still end in a draw.",
+"Surfers have ridden waves taller than a seven-storey building.",
+"Wimbledon still requires players to dress almost entirely in white.",
+"An ice hockey puck is frozen before play to stop it bouncing on the ice.",
+"The first modern Olympic Games were held in Athens in 1896.",
+"Table tennis was once banned in the Soviet Union over fears it harmed players' eyesight.",
+"Bowling lanes are coated with oil in patterns that secretly change how the ball curves.",
+"The fastest recorded tennis serves have topped 260 kilometres per hour.",
+"Sumo wrestlers build their size on a hearty stew, sometimes eating thousands of calories in one sitting.",
+"There's no single fixed size for a football (soccer) pitch — the rules allow a range.",
+"Golf is one of the few sports to have been played on the Moon, where an astronaut hit a ball during Apollo 14."
+],
+arts:[
+"The Mona Lisa has no clearly visible eyebrows.",
+"A piano counts as both a string and a percussion instrument, since its hammers strike strings.",
+"Vincent van Gogh sold very few paintings in his lifetime, yet is now among the most celebrated artists ever.",
+"One avant-garde piece of music is being performed so slowly it's scheduled to last more than 600 years.",
+"The pigment ultramarine was once more costly than gold, ground from a rare blue stone.",
+"Beethoven kept composing masterpieces even after he had gone completely deaf.",
+"Some of the oldest known cave paintings are more than 40,000 years old.",
+"Mozart was composing music by the time he was about five years old.",
+"The saxophone is named after its inventor, Adolphe Sax.",
+"A musical 'octave' spans eight notes, which is exactly where its name comes from.",
+"Many famous paintings hide earlier pictures beneath them, revealed only by X-ray.",
+"The theremin is an instrument you play without ever touching it, just by moving your hands through the air.",
+"Origami, the art of folding paper, has inspired real designs for space telescopes and medical implants.",
+"Pointillist painters build entire scenes out of countless tiny separate dots of colour.",
+"Middle C sits almost exactly in the centre of a standard piano keyboard.",
+"Some sculptures are so tiny they can fit inside the eye of a sewing needle.",
+"A standard guitar has six strings, but twelve-string guitars produce a fuller, shimmering sound.",
+"The colour names 'magenta' and 'cyan' became common only with the rise of printing and, later, screens."
+],
+mythology:[
+"The days of the week in English are named after Norse and Roman gods — Thursday is 'Thor's day.'",
+"Many planets are named for Roman gods: Mars for war, Venus for love, Jupiter the king of the gods.",
+"The word 'panic' comes from the Greek god Pan, who was said to cause sudden, irrational fear.",
+"January is named after Janus, the Roman god of doorways, who looked both forward and back.",
+"An 'Achilles heel' — a single fatal weakness — comes from a Greek hero invulnerable everywhere but his heel.",
+"The phoenix, a bird reborn from its own ashes, appears in myths across many different cultures.",
+"Something 'tantalising,' just out of reach, is named for Tantalus, doomed to fruit and water he could never grasp.",
+"The word 'cereal' comes from Ceres, the Roman goddess of grain and the harvest.",
+"The Atlantic Ocean is named after Atlas, the Titan said to hold up the sky.",
+"In Greek myth, Echo was a nymph who could only repeat the words of others — which is where the term comes from.",
+"The word 'museum' comes from the Muses, the Greek goddesses of art and knowledge.",
+"Norse legend describes a vast world-tree, Yggdrasil, linking nine realms together.",
+"The labyrinth of Greek myth was built to contain the Minotaur, a creature half man and half bull.",
+"A 'jovial' mood comes from Jupiter, also called Jove, whose influence was thought to bring good cheer.",
+"Flood myths appear all over the world, from the Mesopotamian Epic of Gilgamesh to countless others.",
+"The constellation Orion is named after a great hunter from Greek mythology."
+],
+numbers:[
+"Shuffle a deck of cards properly and you've almost certainly created an order that has never existed before in history.",
+"In a room of just 23 people, there's about a 50% chance that two of them share a birthday.",
+"A 'googol' is the number 1 followed by 100 zeros — and the search engine Google is named after a misspelling of it.",
+"Zero cannot be written as a Roman numeral; the Romans had no symbol for nothing.",
+"Multiply 111,111,111 by itself and you get 12,345,678,987,654,321.",
+"There are more possible games of chess than there are atoms in the observable universe.",
+"'Forty' is the only number whose letters appear in alphabetical order when spelled out in English.",
+"Two is the only even prime number.",
+"The decimal 0.999… repeating is exactly equal to 1, not merely close to it.",
+"The Fibonacci sequence turns up throughout nature, from the spirals of sunflowers to the scales of pinecones.",
+"Pi's digits run on forever without ever settling into a repeating pattern.",
+"As a boy, the mathematician Gauss is said to have added every number from 1 to 100 in seconds by noticing they pair up into fifties — totalling 5,050.",
+"There are different sizes of infinity — some endless sets are provably larger than others.",
+"The equals sign was invented in 1557 by a man tired of writing out 'is equal to.'",
+"A number divides evenly by 3 whenever the sum of its digits does.",
+"Any map can be coloured with just four colours so that no two neighbouring regions share one.",
+"Zero is an even number.",
+"There is no largest prime number — the Greeks proved over 2,000 years ago that they go on forever.",
+"The digit zero reached Europe relatively late, arriving from India by way of the Arab world.",
+"In theory, folding a single sheet of paper about 42 times would make it thick enough to reach the Moon."
+]
+};
+
+/* ----------  BUILD MASTER LIST  ---------- */
+const MASTER = [];
+Object.keys(DATA).forEach(cat=>{
+  DATA[cat].forEach(text=> MASTER.push({text, cat}));
+});
+
+/* ----------  STORAGE (graceful)  ---------- */
+const store = {
+  read(){
+    try{ return JSON.parse(localStorage.getItem('almanac_favs')||'[]'); }
+    catch(e){ return window.__favs || []; }
+  },
+  write(arr){
+    try{ localStorage.setItem('almanac_favs', JSON.stringify(arr)); }
+    catch(e){ window.__favs = arr; }
+  }
+};
+let favs = store.read();
+
+/* ----------  STATE  ---------- */
+let activeCat = 'all';
+let pool = MASTER;
+let index = 0;
+
+function dayIndex(){
+  const now = new Date();
+  const start = new Date(now.getFullYear(),0,0);
+  const diff = now - start;
+  return Math.floor(diff / 86400000); // 1..366
+}
+function todayIndexFor(arr){ return dayIndex() % arr.length; }
+
+/* ----------  RENDER  ---------- */
+const el = id => document.getElementById(id);
+const card = el('card');
+
+function rebuildPool(){
+  pool = activeCat==='all' ? MASTER : MASTER.filter(f=>f.cat===activeCat);
+}
+
+function render(animate){
+  const item = pool[index];
+  const paint = ()=>{
+    el('factText').textContent = item.text;
+    el('catLabel').textContent = CATS[item.cat].label;
+    el('dayNum').textContent = dayIndex();
+    el('counter').textContent = `Fact ${index+1} of ${pool.length}`;
+    const saved = favs.includes(item.text);
+    el('heart').textContent = saved ? '♥' : '♡';
+    el('heart').classList.toggle('on', saved);
+    const onToday = (activeCat==='all' && index===todayIndexFor(MASTER));
+    el('todayBtn').classList.toggle('show', !onToday);
+    if(animate){ card.classList.remove('fade'); }
+  };
+  if(animate){
+    card.classList.add('fade');
+    setTimeout(paint, 130);
+  } else { paint(); }
+}
+
+function go(delta){
+  index = (index + delta + pool.length) % pool.length;
+  render(true);
+}
+
+/* ----------  CONTROLS  ---------- */
+el('next').onclick = ()=>go(1);
+el('prev').onclick = ()=>go(-1);
+el('shuffle').onclick = ()=>{
+  let r; do{ r = Math.floor(Math.random()*pool.length); } while(r===index && pool.length>1);
+  index = r; render(true);
+};
+el('todayBtn').onclick = ()=>{
+  activeCat='all'; rebuildPool();
+  document.querySelectorAll('.pill').forEach(p=>p.classList.toggle('on', p.dataset.cat==='all'));
+  index = todayIndexFor(MASTER); render(true);
+};
+el('heart').onclick = ()=>{
+  const t = pool[index].text;
+  const i = favs.indexOf(t);
+  if(i>=0) favs.splice(i,1); else favs.unshift(t);
+  store.write(favs); render(false); renderFavs();
+};
+
+/* ----------  CATEGORY RAIL  ---------- */
+const rail = el('rail');
+function addPill(cat,label){
+  const b = document.createElement('button');
+  b.className='pill'+(cat==='all'?' on':'');
+  b.textContent=label; b.dataset.cat=cat;
+  b.onclick=()=>{
+    activeCat=cat; rebuildPool();
+    document.querySelectorAll('.pill').forEach(p=>p.classList.toggle('on',p===b));
+    index = cat==='all' ? todayIndexFor(MASTER) : 0;
+    render(true);
+  };
+  rail.appendChild(b);
+}
+addPill('all','All topics');
+Object.keys(CATS).forEach(c=>addPill(c,CATS[c].label));
+
+/* ----------  FAVORITES  ---------- */
+const favPanel = el('favPanel');
+el('favToggle').onclick = ()=>{ favPanel.classList.toggle('open'); };
+function renderFavs(){
+  el('favCount').textContent = favs.length;
+  favPanel.innerHTML='';
+  if(favs.length===0){
+    favPanel.innerHTML='<div class="fav-empty">No saved facts yet. Tap the heart on any fact to keep it here.</div>';
+    return;
+  }
+  favs.forEach(t=>{
+    const row=document.createElement('div');
+    row.className='fav-item';
+    const span=document.createElement('span'); span.textContent=t; span.style.flex='1';
+    const x=document.createElement('button'); x.textContent='×'; x.setAttribute('aria-label','Remove');
+    x.onclick=()=>{ favs=favs.filter(f=>f!==t); store.write(favs); renderFavs(); render(false); };
+    row.appendChild(span); row.appendChild(x);
+    favPanel.appendChild(row);
+  });
+}
+
+/* ----------  INIT  ---------- */
+rebuildPool();
+index = todayIndexFor(MASTER);
+render(false);
+renderFavs();
+</script>
+</body>
+</html>
